@@ -30,7 +30,6 @@ st.markdown("""
 # Device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-import gdown
 from model import BoneCNN
 
 @st.cache_resource
@@ -39,15 +38,11 @@ def load_model():
     model_path = os.path.join('saved_models', 'bone_fraction.pth')
     
     if not os.path.exists(model_path):
-        os.makedirs('saved_models', exist_ok=True)
-        st.info("Downloading model weights for the first time...")
-        gdown.download(
-            "https://drive.google.com/uc?id=YOUR_FILE_ID",
-            model_path, quiet=False
-        )
+        st.error(f"Model file not found at {model_path}. Make sure it is included in the repository.")
+        st.stop()
         
     model = BoneCNN().to(device)
-    checkpoint = torch.load(model_path, map_location=device)
+    checkpoint = torch.load(model_path, map_location=device, weights_only=False)
     model.load_state_dict(checkpoint['state_dict'])
     model.eval()
     return model

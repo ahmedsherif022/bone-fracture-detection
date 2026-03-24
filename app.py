@@ -23,22 +23,16 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # Device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-import gdown
 from model import BoneCNN
 
 # Load Model
 model_path = os.path.join('saved_models', 'bone_fraction.pth')
 
 if not os.path.exists(model_path):
-    print("Downloading model weights from Google Drive...")
-    os.makedirs('saved_models', exist_ok=True)
-    gdown.download(
-        "https://drive.google.com/uc?id=YOUR_FILE_ID",
-        model_path, quiet=False
-    )
+    raise FileNotFoundError(f"Model file not found at {model_path}. Make sure it is included in the repository.")
 
 model = BoneCNN().to(device)
-checkpoint = torch.load(model_path, map_location=device)
+checkpoint = torch.load(model_path, map_location=device, weights_only=False)
 model.load_state_dict(checkpoint['state_dict'])
 model.eval()
 
