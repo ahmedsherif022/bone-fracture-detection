@@ -23,42 +23,21 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # Device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# Model Architecture (must match your trained model)
-class BoneCNN(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 32, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-
-            nn.Conv2d(32, 64, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-
-            nn.Conv2d(64, 128, 3, padding=1),
-            nn.ReLU(),
-        )
-
-        self.pool = nn.AdaptiveAvgPool2d((4, 4))
-
-        self.classifier = nn.Sequential(
-            nn.Linear(128 * 4 * 4, 256),
-            nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(256, 2)
-        )
-
-    def forward(self, x):
-        x = self.features(x)
-        x = self.pool(x)
-        x = x.view(x.size(0), -1)
-        return self.classifier(x)
+import gdown
+from model import BoneCNN
 
 # Load Model
-model = BoneCNN().to(device)
 model_path = os.path.join('saved_models', 'bone_fraction.pth')
+
+if not os.path.exists(model_path):
+    print("Downloading model weights from Google Drive...")
+    os.makedirs('saved_models', exist_ok=True)
+    gdown.download(
+        "https://drive.google.com/uc?id=YOUR_FILE_ID",
+        model_path, quiet=False
+    )
+
+model = BoneCNN().to(device)
 checkpoint = torch.load(model_path, map_location=device)
 model.load_state_dict(checkpoint['state_dict'])
 model.eval()

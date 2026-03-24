@@ -30,44 +30,23 @@ st.markdown("""
 # Device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# Model Architecture
-class BoneCNN(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 32, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-
-            nn.Conv2d(32, 64, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-
-            nn.Conv2d(64, 128, 3, padding=1),
-            nn.ReLU(),
-        )
-
-        self.pool = nn.AdaptiveAvgPool2d((4, 4))
-
-        self.classifier = nn.Sequential(
-            nn.Linear(128 * 4 * 4, 256),
-            nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(256, 2)
-        )
-
-    def forward(self, x):
-        x = self.features(x)
-        x = self.pool(x)
-        x = x.view(x.size(0), -1)
-        return self.classifier(x)
+import gdown
+from model import BoneCNN
 
 @st.cache_resource
 def load_model():
     """Load the trained model"""
-    model = BoneCNN().to(device)
     model_path = os.path.join('saved_models', 'bone_fraction.pth')
+    
+    if not os.path.exists(model_path):
+        os.makedirs('saved_models', exist_ok=True)
+        st.info("Downloading model weights for the first time...")
+        gdown.download(
+            "https://drive.google.com/uc?id=YOUR_FILE_ID",
+            model_path, quiet=False
+        )
+        
+    model = BoneCNN().to(device)
     checkpoint = torch.load(model_path, map_location=device)
     model.load_state_dict(checkpoint['state_dict'])
     model.eval()
@@ -155,10 +134,10 @@ if uploaded_file is not None:
         prediction = results['prediction']
         confidence = results['confidence']
         
-        if prediction == 'Fracture':
-            st.error(f"### {prediction}\n**Confidence: {confidence:.2f}%**")
+        if prediction == 'fractured':
+            st.error(f"### Fractured\n**Confidence: {confidence:.2f}%**")
         else:
-            st.success(f"### {prediction}\n**Confidence: {confidence:.2f}%**")
+            st.success(f"### Not Fractured\n**Confidence: {confidence:.2f}%**")
     
     st.divider()
     
@@ -171,16 +150,16 @@ if uploaded_file is not None:
         st.metric("Confidence", f"{confidence:.2f}%")
     
     with col2:
-        st.metric("No Fracture", f"{results['no_fracture_prob']:.2f}%")
+        st.metric("No Fracture", f"{results['notfractured_prob']:.2f}%")
     
     with col3:
-        st.metric("Fracture", f"{results['fracture_prob']:.2f}%")
+        st.metric("Fracture", f"{results['fractured_prob']:.2f}%")
     
     # Probability chart
     st.markdown("### 📈 Probability Distribution")
     prob_data = {
-        'No Fracture': results['no_fracture_prob'],
-        'Fracture': results['fracture_prob']
+        'No Fracture': results['notfractured_prob'],
+        'Fracture': results['fractured_prob']
     }
     st.bar_chart(prob_data)
 

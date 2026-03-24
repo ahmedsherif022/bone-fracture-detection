@@ -8,3 +8,6 @@ Werkzeug
 
 # Optional: For Streamlit version
 streamlit
+
+# For downloading models from Google Drive
+gdown
