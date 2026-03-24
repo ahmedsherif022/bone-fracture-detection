@@ -1,21 +1,27 @@
+# Dataset
+bone frature dataset/
+dataset/
+data/
+*.csv
+*.jpg
+*.jpeg
+*.png
+
+# Model weights
+*.pth
+*.pt
+saved_models/
+
+# Python cache
+__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
 # Environments
 .env
 .venv
 env/
 venv/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Models and datasets
-*.pt
-*.pth
-*.h5
-dataset/
-data/
