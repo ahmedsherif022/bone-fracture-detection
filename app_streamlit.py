@@ -6,6 +6,8 @@ import numpy as np
 from torchvision import transforms
 import os
 
+
+
 # Set page config
 st.set_page_config(
     page_title="Bone Fracture Detection",
@@ -35,7 +37,8 @@ from model import BoneCNN
 @st.cache_resource
 def load_model():
     """Load the trained model"""
-    model_path = os.path.join('saved_models', 'bone_fraction.pth')
+    model_path = 'bone_fraction.pth'
+
     
     if not os.path.exists(model_path):
         st.error(f"Model file not found at {model_path}. Make sure it is included in the repository.")
