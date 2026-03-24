@@ -1,0 +1,10 @@
+# Core dependencies
+Flask
+torch
+torchvision
+Pillow
+numpy
+Werkzeug
+
+# Optional: For Streamlit version
+streamlit

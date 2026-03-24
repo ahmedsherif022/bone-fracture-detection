@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedScan AI — Bone Fracture Detection</title>
+    <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2695.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root{--bg:#f3f6fb;--card:#ffffff;--muted:#6b7280;--primary:#0b5ed7;--accent:#ff6b6b}
+        *{box-sizing:border-box}
+        body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:#0f172a; margin:0}
+        /* Nav */
+        nav{background:var(--card);box-shadow:0 4px 20px rgba(15,23,42,0.06);position:sticky;top:0;z-index:40}
+        .nav{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+        .brand{display:flex;gap:12px;align-items:center;font-weight:700;color:var(--primary)}
+        .brand i{font-size:22px}
+        .nav-links{display:flex;gap:18px}
+        .nav-links a{text-decoration:none;color:var(--muted);font-weight:600}
+
+        /* Hero */
+        .hero{max-width:1200px;margin:36px auto;padding:28px 20px;display:grid;grid-template-columns:1fr 420px;gap:24px;align-items:center}
+        .hero-left{padding:28px;border-radius:14px;background:linear-gradient(180deg,#ffffff, #f8fbff);box-shadow:0 10px 30px rgba(2,6,23,0.04)}
+        .kicker{display:inline-block;padding:6px 10px;background:rgba(11,94,215,0.08);color:var(--primary);border-radius:999px;font-weight:700;margin-bottom:12px}
+        h1{font-size:34px;margin:6px 0 12px;line-height:1.05}
+        p.lead{color:var(--muted);font-size:16px;margin-bottom:18px}
+        .cta-row{display:flex;gap:12px}
+        .btn{padding:12px 16px;border-radius:10px;font-weight:700;cursor:pointer;border:0}
+        .btn-primary{background:var(--primary);color:#fff}
+        .btn-outline{background:transparent;border:1px solid #e6eefb;color:var(--primary)}
+
+        /* Right column with medical image */
+        .hero-right{display:flex;flex-direction:column;gap:12px}
+        .hero-illustration{border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(2,6,23,0.08)}
+        .hero-illustration img{width:100%;height:100%;display:block;object-fit:cover}
+
+        /* Main content */
+        .main{max-width:1200px;margin:18px auto;padding:0 20px}
+        .grid{display:grid;grid-template-columns:1fr 420px;gap:24px}
+
+        .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.04)}
+        .upload-area{border:2px dashed rgba(11,94,215,0.18);border-radius:10px;padding:28px;text-align:center;cursor:pointer}
+        .upload-area.dragging{background:rgba(11,94,215,0.02)}
+        .upload-area .icon{font-size:36px;color:var(--primary);margin-bottom:8px}
+        .upload-text{font-weight:700}
+        .muted{color:var(--muted);font-size:14px}
+
+        .preview img{width:100%;border-radius:10px;object-fit:cover}
+
+        .results{display:none}
+        .results.show{display:block}
+        .prediction{background:linear-gradient(90deg,var(--primary),#004bb5);color:#fff;padding:18px;border-radius:10px;text-align:center}
+        .prediction h3{margin:0;font-size:18px}
+        .prediction p{margin:6px 0 0;font-size:28px;font-weight:800}
+
+        .result-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+        .result-item{background:#f8fbff;border-radius:10px;padding:12px}
+        .result-item .label{font-size:12px;color:var(--muted);text-transform:uppercase}
+        .result-item .value{font-size:18px;font-weight:800;color:var(--primary)}
+
+        .info{margin-top:20px;color:var(--muted);font-size:14px}
+
+        footer{max-width:1200px;margin:36px auto;padding:18px 20px;color:var(--muted);text-align:center}
+
+        @media (max-width:900px){.hero{grid-template-columns:1fr;}.grid{grid-template-columns:1fr}.hero-right{order:-1}}
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav">
+            <div class="brand"><i class="fas fa-stethoscope"></i> MedScan AI</div>
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">About</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-left">
+            <div class="kicker">Clinical AI • Instant Results</div>
+            <h1>Detect bone fractures quickly and confidently</h1>
+            <p class="lead">MedScan AI analyzes X-ray images using a validated deep-learning model to help clinicians and patients spot fractures with clear confidence scores and friendly explanations.</p>
+            <div class="cta-row">
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()"><i class="fas fa-upload"></i>&nbsp; Upload X‑ray</button>
+                <button class="btn btn-outline" onclick="window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'})">Learn More</button>
+            </div>
+            <div class="info">Trusted by clinicians for research and educational use. Not a substitute for clinical judgment.</div>
+        </div>
+        <div class="hero-right">
+            <div class="hero-illustration"><img src="https://images.unsplash.com/photo-1580281657522-9c7b6f4b1d3f?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=6b8a0b6b9e5b6e1e3e0f" alt="medical illustration"></div>
+            <div class="card" style="display:flex;gap:12px;align-items:center">
+                <div style="flex:1">
+                    <div style="font-weight:700">Human-centered design</div>
+                    <div class="muted">Clear visuals, accessible outputs and patient-friendly language.</div>
+                </div>
+                <div><i class="fas fa-heartbeat" style="font-size:28px;color:var(--accent)"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <main class="main">
+        <div class="grid">
+            <div>
+                <div class="card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                        <div style="font-weight:800">Upload X‑ray</div>
+                        <div class="muted">PNG, JPG, JPEG • Max 16MB</div>
+                    </div>
+                    <div id="uploadArea" class="upload-area">
+                        <div class="icon"><i class="fas fa-image"></i></div>
+                        <div class="upload-text">Click or drag an image here</div>
+                        <div class="muted">We anonymize on upload. This tool is for research/educational use.</div>
+                        <input type="file" id="fileInput" accept="image/*" style="display:none">
+                    </div>
+                    <div class="button-row" style="margin-top:14px;display:flex;gap:8px">
+                        <button class="btn btn-primary" id="uploadBtn">Choose Image</button>
+                        <button class="btn btn-outline" id="clearBtn">Clear</button>
+                    </div>
+                    <div id="preview" style="margin-top:14px;display:none" class="preview card">
+                        <div style="font-weight:700;margin-bottom:8px">Preview</div>
+                        <img id="previewImg" alt="Preview" style="width:100%;height:320px;object-fit:contain">
+                    </div>
+                </div>
+
+                <div id="results" class="card results" style="margin-top:16px">
+                    <div class="prediction">
+                        <h3 id="prediction_label">Diagnosis</h3>
+                        <p id="prediction">-</p>
+                    </div>
+                    <div class="result-list">
+                        <div class="result-item">
+                            <div class="label">Model Confidence</div>
+                            <div class="value" id="confidence">-</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">No Fracture</div>
+                            <div class="value" id="notfractured">-</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px" class="result-item">
+                        <div class="label">Fracture Probability</div>
+                        <div class="value" id="fractured" style="color:var(--accent)">-</div>
+                    </div>
+                    <div class="info" style="margin-top:12px">If the model indicates a fracture, seek immediate clinical evaluation. This tool supports, not replaces, medical professionals.</div>
+                </div>
+            </div>
+
+            <aside>
+                <div class="card">
+                    <div style="font-weight:800;margin-bottom:8px">Why choose MedScan AI?</div>
+                    <ul style="color:var(--muted);margin:0 0 0 18px;padding:0">
+                        <li>Fast, explainable predictions</li>
+                        <li>Clinically-oriented output</li>
+                        <li>Secure & private (local model)</li>
+                    </ul>
+                </div>
+
+                <div class="card" style="margin-top:12px">
+                    <div style="font-weight:800;margin-bottom:8px">Patient Story</div>
+                    <div class="muted">“I uploaded my son's X-ray and received a clear result that helped me get a faster appointment.”</div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <footer>
+        MedScan AI — For research and educational use only. Not for diagnostic replacement.
+    </footer>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const preview = document.getElementById('preview');
+        const previewImg = document.getElementById('previewImg');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorDiv = document.getElementById('error');
+
+        uploadBtn.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragging'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragging'));
+        uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragging'); const files = e.dataTransfer.files; if (files.length) handleFile(files[0]); });
+
+        fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleFile(e.target.files[0]); });
+
+        clearBtn.addEventListener('click', () => { fileInput.value=''; preview.style.display='none'; results.classList.remove('show'); });
+
+        function handleFile(file){
+            if(!file.type.startsWith('image/')){ alert('Please upload an image'); return }
+            const reader = new FileReader();
+            reader.onload = (e) => { previewImg.src = e.target.result; preview.style.display = 'block'; predictImage(file); };
+            reader.readAsDataURL(file);
+        }
+
+        function predictImage(file){
+            const formData = new FormData(); formData.append('file', file);
+            results.classList.remove('show');
+            fetch('/predict',{method:'POST',body:formData})
+            .then(r=>r.json())
+            .then(data=>{
+                if(data.error){ alert(data.error); return }
+                document.getElementById('prediction').textContent = data.prediction.toUpperCase();
+                document.getElementById('confidence').textContent = data.confidence;
+                document.getElementById('notfractured').textContent = data.notfractured_prob || data.notfractured || '-';
+                document.getElementById('fractured').textContent = data.fractured_prob || data.fractured || '-';
+                results.classList.add('show');
+            })
+            .catch(err=>{ alert('Upload failed: '+err.message) });
+        }
+    </script>
+</body>
+</html>
